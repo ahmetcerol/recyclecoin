@@ -37,7 +37,7 @@ class Block{
 
 class Blockchain{
     constructor(){
-        this.chain=[this.createGenesisBlock];
+        this.chain=[this.createGenesisBlock()];
         this.difficulty=2;
         this.pendingTransactions=[];
         this.miningReward=100;
@@ -52,36 +52,41 @@ class Blockchain{
     }
 
    minePendingTransactions(miningRewardAddress){
-    let block= new Block(Date.now(),this.pendingTransactions);
+    const rewardTx= new Transaction(null,miningRewardAddress,this.miningReward);
+    this.pendingTransactions.push(rewardTx);
+
+
+    const block= new Block(Date.now(),this.pendingTransactions,this.getLatestBlock().hash);
     block.mineBlock(this.difficulty);
 
     console.log('Block succesfully mined!');
     this.chain.push(block);
 
-    this.pendingTransactions=[
-        new Transaction(null, miningRewardAddress,this.miningReward)
-    ];
+    this.pendingTransactions=[];
    }
 
    createTransaction(transaction){
     this.pendingTransactions.push(transaction);
    }
 
-   getBalanceOfAddress(address){
-    let balance=0;
+   getBalanceOfAddress(address) {
+    let balance = 0;
 
-    for(const block of this.chain){
-        for(const trans of block.transactions){
-            if(trans.fromAddress===address){
-                balance-=trans.amount;
-            }
-            if(trans.toAddress===address){
-                balance+=trans.amount;
-            }
+    for (const block of this.chain) {
+      for (const trans of block.transactions) {
+        if (trans.fromAddress === address) {
+          balance -= trans.amount;
         }
+
+        if (trans.toAddress === address) {
+          balance += trans.amount;
+        }
+      }
     }
+
+   
     return balance;
-   }
+  }
     
     isChainValid(){
         for(let i =1;i<this.chain.length;i++){
@@ -106,5 +111,8 @@ recycleCoin.createTransaction(new Transaction('address2','address1',50));
 
 console.log("\n starting the miner.");
 recycleCoin.minePendingTransactions('a');
-console.log('',recycleCoin.getBalanceOfAddress('a'));
+console.log('Ahmets coin',recycleCoin.getBalanceOfAddress('a'));
+
+recycleCoin.minePendingTransactions('a');
+console.log('Ahmets coin',recycleCoin.getBalanceOfAddress('a'));
 
